@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import ndcg_score
+from neumf import NeuMF
 
 # === Load and encode data ===
-df = pd.read_csv('C:\\Users\\alexp\\Licenta\\Model\\NeuMF\\neumf_training_data.csv')
+df = pd.read_csv('C:\\Users\\alexp\\Licenta\\Model\\NeuMF\\data\\neumf_training_data.csv')
 
 user_encoder = LabelEncoder()
 item_encoder = LabelEncoder()
@@ -21,37 +22,11 @@ X = df[['user', 'item']]
 y = df['label']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-# === NeuMF model (paper spec) ===
-class NeuMF(tf.keras.Model):
-    def __init__(self, num_users, num_items, embedding_dim=64):
-        super(NeuMF, self).__init__()
-        self.gmf_user = tf.keras.layers.Embedding(num_users, embedding_dim)
-        self.gmf_item = tf.keras.layers.Embedding(num_items, embedding_dim)
-
-        self.mlp_user = tf.keras.layers.Embedding(num_users, embedding_dim)
-        self.mlp_item = tf.keras.layers.Embedding(num_items, embedding_dim)
-
-        self.mlp_layers = tf.keras.Sequential([
-            tf.keras.layers.Dense(128, activation='relu'),
-            tf.keras.layers.Dense(64, activation='relu'),
-            tf.keras.layers.Dense(32, activation='relu')
-        ])
-
-        self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid')
-
-    def call(self, inputs):
-        user_input, item_input = inputs[:, 0], inputs[:, 1]
-
-        gmf_vec = tf.multiply(self.gmf_user(user_input), self.gmf_item(item_input))
-
-        mlp_vec = tf.concat([self.mlp_user(user_input), self.mlp_item(item_input)], axis=1)
-        mlp_vec = self.mlp_layers(mlp_vec)
-
-        final_vec = tf.concat([gmf_vec, mlp_vec], axis=1)
-        return self.output_layer(final_vec)
 
 # === Instantiate and compile model ===
 model = NeuMF(num_users, num_items)
+
+
 model.compile(
     optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
     loss='binary_crossentropy',
@@ -74,7 +49,7 @@ history = model.fit(
         )
     ]
 )
-
+model.save('data\\neumf_model.keras')
 # === Evaluation ===
 X_test_tensor = tf.convert_to_tensor(X_test.values, dtype=tf.int32)
 y_test_tensor = tf.convert_to_tensor(y_test.values, dtype=tf.float32)
@@ -145,6 +120,5 @@ plt.legend()
 plt.grid(True)
 
 plt.tight_layout()
-plt.savefig("neumf_combined_plot.png")
+plt.savefig("data\\neumf_combined_plot.png")
 plt.show()
-
