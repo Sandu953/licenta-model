@@ -4,7 +4,6 @@ import tensorflow as tf
 @tf.keras.utils.register_keras_serializable()
 class NeuMF(tf.keras.Model):
     def __init__(self, num_users, num_items, embedding_dim=64, **kwargs):
-        #super(NeuMF, self).__init__()
         super().__init__(**kwargs)
         self.num_users = num_users
         self.num_items = num_items
@@ -18,8 +17,11 @@ class NeuMF(tf.keras.Model):
 
         self.mlp_layers = tf.keras.Sequential([
             tf.keras.layers.Dense(128, activation='relu'),
+            tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(64, activation='relu'),
-            tf.keras.layers.Dense(32, activation='relu')
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.Dense(32, activation='relu'),
+            tf.keras.layers.Dropout(0.2)
         ])
 
         self.output_layer = tf.keras.layers.Dense(1, activation='sigmoid')
@@ -36,9 +38,7 @@ class NeuMF(tf.keras.Model):
         return self.output_layer(final_vec)
 
     def get_config(self):
-        # base_config = super().get_config()
         return {
-            # **base_config,
             "num_users": self.num_users,
             "num_items": self.num_items,
             "embedding_dim": self.embedding_dim,
