@@ -141,6 +141,6 @@ def pretty_print_recommendations(df):
     for profile, group in grouped:
         print(f"\n🔹 {profile}")
         for _, row in group.iterrows():
-            print(f"   - {row['Maker']} {row['Genmodel']} {row['score']}")
+            print(f"   - {row['Maker']} {row['Genmodel']} {row['score']} {row['item_id']}")
 
 pretty_print_recommendations(results_df)

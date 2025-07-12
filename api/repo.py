@@ -57,3 +57,12 @@ class InventoryRepository:
             if not rows:
                 return set()
             return set(row[0] for row in rows)
+
+
+
+# InventorRepository = InventoryRepository()
+# print(InventorRepository.get_live_inventory())
+#
+# UserRepository = UserRepository()
+# print(UserRepository.get_recent_interactions(5))
+
